@@ -22,12 +22,15 @@ def hello():
 #Function to accept user input and recommened new craft beers - user input to be 3 inputs
 def predict():
     try:    
-
+        print("one")
         input_test = pd.DataFrame(request.json) #JSON input from user
+        print("two")
         input_test['beer_beerid'] = pd.DataFrame(beer3.loc[beer3['beer_name'].isin(input_test['beer_name']), 'beer_beerid'].unique()) #Obtain beer id for beer name given by user
+        print("three")
         input_test['userId'] = input_test['userId'].astype(str) #Convert userId column to appropriate format for append
+        print("four")
         frame = beer3.append(input_test, sort=True) #Append info to dataframe of all beer reviews 
-
+        print("five")
         frame[['userId','beer_beerid']] = frame[['userId', 'beer_beerid']].apply(lambda x: x.astype(str)) #Convert columns to appropriate format
         frame['review_overall'] = frame['review_overall'].astype('float64')
         
