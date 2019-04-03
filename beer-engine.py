@@ -92,6 +92,4 @@ if __name__ == '__main__':
     svd_iOS = joblib.load('recommender_model')
     print("model loaded")
     print(predict())
-
-    print("mainEight")
-    app.run(port=port, debug=True)
+    app.run(port=port, debug=False)
