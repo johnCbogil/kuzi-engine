@@ -71,7 +71,7 @@ if __name__ == '__main__':
     training_set = Dataset.load_from_df(beer3[['userId', 'beer_beerid', 'review_overall']], reader)
     print("mainFive")
     training_set = training_set.build_full_trainset()
-print("mainSix")
+    print("mainSix")
     #Set model parameters - kNN & SVD
     sim_options = {
         'name': 'pearson_baseline',
@@ -80,7 +80,7 @@ print("mainSix")
  
     knn = KNNBasic(sim_options=sim_options, k=10)
     svd = SVD()
-print("mainSeven")
+    print("mainSeven")
     #Train model
     #knn.fit(training_set)
     svd.fit(training_set)
