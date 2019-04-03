@@ -58,6 +58,7 @@ if __name__ == '__main__':
     except:
         port = 5000 # If you don't provide any port then the port will be set to 12345
 
+    print("main")
     # Read beers from csv
     beer3 = pd.read_csv('beerCSV.csv')
     #Convert columns to appropriate format
