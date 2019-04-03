@@ -8,6 +8,7 @@ from flask import jsonify
 from surprise import KNNBasic, SVD, Reader, Dataset
 from surprise.model_selection import cross_validate
 import collections
+import traceback
 
 app = Flask(__name__)
 
@@ -48,8 +49,8 @@ def predict():
         predictions3 = predictions3[['beer_name','beer_abv','beer_style']].to_json(orient='index') #Convert desired output to json for iOS output
 
         return jsonify({"prediction": predictions3})
-    except:
-        print("except")
+    except Exception:
+        traceback.print_exc()
 
 
 if __name__ == '__main__':
