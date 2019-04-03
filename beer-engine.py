@@ -31,6 +31,7 @@ def predict():
         print("four")
         frame = beer3.append(input_test, sort=True) #Append info to dataframe of all beer reviews 
         print("five")
+
         frame[['userId','beer_beerid']] = frame[['userId', 'beer_beerid']].apply(lambda x: x.astype(str)) #Convert columns to appropriate format
         frame['review_overall'] = frame['review_overall'].astype('float64')
         
