@@ -13,7 +13,34 @@ import traceback
 app = Flask(__name__)
 
 # Do data processing here?
+ # Read beers from csv
+beer3 = pd.read_csv('beerCSV.csv')
+#Convert columns to appropriate format
+beer3[['userId','beer_beerid']] = beer3[['userId', 'beer_beerid']].apply(lambda x: x.astype(str))
+#Create and prepare training set for model input
+reader = Reader(rating_scale=(1, 5))
+training_set = Dataset.load_from_df(beer3[['userId', 'beer_beerid', 'review_overall']], reader)
+training_set = training_set.build_full_trainset()
 
+#Set model parameters - kNN & SVD
+sim_options = {
+    'name': 'pearson_baseline',
+    'user_based': True
+}
+
+knn = KNNBasic(sim_options=sim_options, k=10)
+svd = SVD()
+
+#Train model
+#knn.fit(training_set)
+svd.fit(training_set)
+
+#Save Model
+joblib.dump(svd, 'recommender_model')
+
+#Load Model for API
+svd_iOS = joblib.load('recommender_model')
+print("model loaded")
 
 @app.route("/")
 def hello():
@@ -59,35 +86,6 @@ if __name__ == '__main__':
     except:
         port = 5000 # If you don't provide any port then the port will be set to 12345
 
-    # Read beers from csv
-    beer3 = pd.read_csv('beerCSV.csv')
-    #Convert columns to appropriate format
-    beer3[['userId','beer_beerid']] = beer3[['userId', 'beer_beerid']].apply(lambda x: x.astype(str))
-    #Create and prepare training set for model input
-    reader = Reader(rating_scale=(1, 5))
-    training_set = Dataset.load_from_df(beer3[['userId', 'beer_beerid', 'review_overall']], reader)
-    training_set = training_set.build_full_trainset()
-
-    #Set model parameters - kNN & SVD
-    sim_options = {
-        'name': 'pearson_baseline',
-        'user_based': True
-    }
- 
-    knn = KNNBasic(sim_options=sim_options, k=10)
-    svd = SVD()
-
-    #Train model
-    #knn.fit(training_set)
-    svd.fit(training_set)
-
-    #Save Model
-    joblib.dump(svd, 'recommender_model')
-
-    #Load Model for API
-    svd_iOS = joblib.load('recommender_model')
-    print("model loaded")
-    print(predict())
-
+   
     
     app.run(port=port, debug=True)
