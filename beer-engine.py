@@ -46,7 +46,7 @@ print("model loaded")
 def hello():
     return "Welcome to machine learning model APIs!"
 
-@app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['GET','POST'])
 #Function to accept user input and recommened new craft beers - user input to be 3 inputs
 def predict():
     try:    
