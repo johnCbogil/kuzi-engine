@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 # Do data processing here?
  # Read beers from csv
-beer3 = pd.read_csv('beerCSV.csv')
+beer3 = pd.read_csv('beerCSV.csv', encoding="utf-8-sig")
 #Convert columns to appropriate format
 beer3[['userId','beer_beerid']] = beer3[['userId', 'beer_beerid']].apply(lambda x: x.astype(str))
 #Create and prepare training set for model input
