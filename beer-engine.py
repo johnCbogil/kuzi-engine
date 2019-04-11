@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 # Do data processing here?
  # Read beers from csv
-beer3 = pd.read_csv('beerCSV.csv', encoding="utf-8-sig")
+beer3 = pd.read_csv('beerCSV.csv')
 #Convert columns to appropriate format
 beer3[['userId','beer_beerid']] = beer3[['userId', 'beer_beerid']].apply(lambda x: x.astype(str))
 #Create and prepare training set for model input
@@ -46,7 +46,7 @@ print("model loaded")
 def hello():
     return "Welcome to machine learning model APIs!"
 
-@app.route('/predict', methods=['GET','POST'])
+@app.route('/predict', methods=['POST'])
 #Function to accept user input and recommened new craft beers - user input to be 3 inputs
 def predict():
     try:    
