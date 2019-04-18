@@ -15,34 +15,38 @@ app = Flask(__name__)
 
 # Read beers from csv
 beer3 = pd.read_csv('beerCSV.csv')
+print("#Read beers from csv")
 
-#Convert columns to appropriate format
-beer3[['userId','beer_beerid']] = beer3[['userId', 'beer_beerid']].apply(lambda x: x.astype(str))
+#Create dataframe of required columns then convert to SFrame for turicreate
+beer3_1 = beer3[['userId','beer_beerid','review_overall']]
+beer3_1 = tc.SFrame(beer3_1)
+beer3_1 = beer3_1.dropna()
+print("#Create dataframe of required columns then convert to SFrame for turicreate")
 
-#Create and prepare training set for model input
-reader = Reader(rating_scale=(1, 5))
-training_set = Dataset.load_from_df(beer3[['userId', 'beer_beerid', 'review_overall']], reader)
-training_set = training_set.build_full_trainset()
+#Create SFrame of additional info on beers for model
+beer_info = beer3[['beer_beerid','beer_style','beer_abv']].drop_duplicates()
+beer_info = tc.SFrame(beer_info)
+print("#Create SFrame of additional info on beers for model")
 
-#Set model parameters - kNN & SVD
-sim_options = {
-    'name': 'pearson_baseline',
-    'user_based': True
-}
- 
-knn = KNNBasic(sim_options=sim_options, k=10)
-svd = SVD()
+#Create training and validation set
+training_data, validation_data = tc.recommender.util.random_split_by_user(beer3_1, 'userId', 'beer_beerid')
+print("#Create training and validation set")
 
-#Train model
-#knn.fit(training_set)
-svd.fit(training_set)
+#Create item similarity model
+beer_model = tc.item_similarity_recommender.create(training_data, 
+                                            user_id="userId", 
+                                            item_id="beer_beerid", 
+                                            item_data=beer_info,
+                                            target="review_overall")
+print("#Create item similarity model")           
 
-#Save Model
-joblib.dump(svd, 'recommender_model')
+#Save model
+beer_model.save("beer_model")
+print("#Save model")
 
-#Load Model for API
-svd_iOS = joblib.load('recommender_model')
-print("model loaded")
+#Load model
+beer_model_load = tc.load_model("beer_model")
+print("#Load model")
 
 @app.route("/")
 def hello():
@@ -51,30 +55,24 @@ def hello():
 @app.route('/predict', methods=['POST'])
 #Function to accept user input and recommened new craft beers - user input to be 3 inputs
 def predict():
-    try:    
-        
-        print(request.json)
+    try:
         input_test = pd.DataFrame(request.json) #JSON input from user
-        input_test['beer_beerid'] = pd.DataFrame(beer3.loc[beer3['beer_name'].isin(input_test['beer_name']), 'beer_beerid'].unique()) #Obtain beer id for beer name given by user
-        input_test['userId'] = input_test['userId'].astype(str) #Convert userId column to appropriate format for append
-        frame = beer3.append(input_test, sort=True) #Append info to dataframe of all beer reviews 
+        input_test['beer_beerid'] = pd.DataFrame(beer3.loc[beer3['beer_name'].isin(input_test['beer_name']), 'beer_beerid'].unique()).astype('int64') #Obtain beer id for beer name given by user
+        print("#Obtain beer id for beer name given by user")
 
-        frame[['userId','beer_beerid']] = frame[['userId', 'beer_beerid']].apply(lambda x: x.astype(str)) #Convert columns to appropriate format
-        frame['review_overall'] = frame['review_overall'].astype('float64')
-        
-        iids = frame['beer_beerid'].unique() #Obtain list of all beer Ids
-        iids2 = frame.loc[frame['userId'].isin(input_test['userId']), 'beer_beerid'] #Obtain list of ids that user has rated
-        iids_to_pred = np.setdiff1d(iids,iids2) #List of all beers user didn't rate
-                            
-        testtest = [['user', beer_beerid, 4.5] for beer_beerid in iids_to_pred] #Array of beers to predict for users      
-        predictions2 = pd.DataFrame(svd.test(testtest)) #Predict and convert to DataFrame
-        
-        predictions2 = predictions2.sort_values(by=['est'], ascending = False)[:5] #Obtain top 5 predictions
-        predictions3 = predictions2.merge(beer3[['beer_name','beer_beerid','beer_abv','beer_style']], left_on='iid',right_on='beer_beerid').drop_duplicates(['beer_beerid']) #Join predictions to beer3 to obtain additional information
-        
-        predictions3 = predictions3[['beer_name','beer_abv','beer_style']].to_json(orient='index') #Convert desired output to json for iOS output
+        predict_frame = tc.SFrame(input_test) #Convert user input dataframe to SFrame
+        print("#Convert user input dataframe to SFrame")
 
-        return jsonify({"prediction": predictions3})
+        beer_recs = pd.DataFrame(beer_model.recommend(predict_frame['userId'], new_observation_data = predict_frame)) #Predict new beers for user and convert to dataframe
+        print("#Predict new beers for user and convert to dataframe")
+
+        beer_recs_final = beer_recs.merge(beer3[['beer_name','beer_beerid','beer_abv','beer_style']], on='beer_beerid').drop_duplicates(['beer_beerid']) #Join predictions to beer3 to obtain additional information
+        print("#Join predictions to beer3 to obtain additional information")
+
+        beer_recs_final = beer_recs_final[['beer_name','beer_abv','beer_style']].to_json(orient='records') #Convert desired output to json for iOS output
+        print("#Convert desired output to json for iOS output")
+        
+        return beer_recs_final    
 
     except Exception:
         traceback.print_exc()
