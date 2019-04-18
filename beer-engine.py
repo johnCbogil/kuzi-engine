@@ -9,6 +9,8 @@ from surprise import KNNBasic, SVD, Reader, Dataset
 from surprise.model_selection import cross_validate
 import collections
 import traceback
+import turicreate as tc
+
 
 app = Flask(__name__)
 
@@ -73,7 +75,7 @@ def predict():
         predictions2 = predictions2.sort_values(by=['est'], ascending = False)[:5] #Obtain top 5 predictions
         predictions3 = predictions2.merge(beer3[['beer_name','beer_beerid','beer_abv','beer_style']], left_on='iid',right_on='beer_beerid').drop_duplicates(['beer_beerid']) #Join predictions to beer3 to obtain additional information
 
-        predictions3 = predictions3[['beer_name','beer_abv','beer_style']].to_json(orient='index') #Convert desired output to json for iOS output
+        predictions3 = predictions3[['beer_name','beer_abv','beer_style']].to_json(orient='table') #Convert desired output to json for iOS output
 
         return jsonify({"prediction": predictions3})
     except Exception:
