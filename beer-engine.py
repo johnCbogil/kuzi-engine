@@ -10,6 +10,7 @@ from surprise.model_selection import cross_validate
 import collections
 import traceback
 import turicreate as tc
+from flask import send_file
 
 app = Flask(__name__)
 
@@ -50,10 +51,10 @@ print("#Load model")
 
 @app.route("/")
 def hello():
-    return "Welcome to machine learning model APIs!"
+    return send_file("tc.jpg", mimetype='image/jpg')
+    # return "Welcome to machine learning model APIs!"
 
 @app.route('/predict', methods=['POST'])
-#Function to accept user input and recommened new craft beers - user input to be 3 inputs
 def predict():
     try:
         input_test = pd.DataFrame(request.json) #JSON input from user
