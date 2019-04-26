@@ -13,7 +13,7 @@ import turicreate as tc
 
 
 #Read CSV 
-beer2 = pd.read_csv('/beer2.csv')
+beer2 = pd.read_csv('beer2.csv')
 
 
 # In[7]:
@@ -56,51 +56,3 @@ beer_model = tc.item_similarity_recommender.create(training_data,
 
 #Save model
 beer_model.save("beer_model")
-
-
-# In[12]:
-
-
-#Load model
-beer_model_load = tc.load_model("beer_model")
-
-
-# In[127]:
-
-
-#data2 = tc.SFrame({'userId': [10200,10200,10200],
-                          #'beer_beerid': [1550,5441,17538]})
-
-
-# In[126]:
-
-
-#model.recommend(['10200'], new_observation_data = data2)
-
-
-# In[50]:
-
-
-def user_input():
-    input_test = pd.DataFrame(pd.read_json('{"userId": ["101010","101010","101010"], "beer_name": ["Bourbon Chaos","Four O Ice Beer","Krugbier"]}')) #JSON input from user
-    input_test['beer_beerid'] = pd.DataFrame(beer2.loc[beer2['beer_name'].isin(input_test['beer_name']), 'beer_beerid'].unique()).astype('int64') #Obtain beer id for beer name given by user
-    
-    predict_frame = tc.SFrame(input_test) #Convert user input dataframe to SFrame
-    beer_recs = pd.DataFrame(beer_model.recommend(predict_frame['userId'], new_observation_data = predict_frame)) #Predict new beers for user and convert to dataframe
-    
-    beer_recs_final = beer_recs.merge(beer2[['beer_name','beer_beerid','beer_abv','beer_style']], on='beer_beerid').drop_duplicates(['beer_beerid']) #Join predictions to beer3 to obtain additional information
-    beer_recs_final = beer_recs_final[['beer_name','beer_abv','beer_style']]#.to_json(orient='records') #Convert desired output to json for iOS output
-    
-    return beer_recs_final
-
-
-# In[51]:
-
-
-result = user_input()
-
-
-# In[ ]:
-
-
-result
