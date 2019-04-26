@@ -28,7 +28,8 @@ def hello():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        input_test = pd.DataFrame(pd.read_json('{"userId": ["101010","101010","101010"], "beer_name": ["Bourbon Chaos","Four O Ice Beer","Krugbier"]}')) #JSON input from user
+        # input_test = pd.DataFrame(pd.read_json('{"userId": ["101010","101010","101010"], "beer_name": ["Bourbon Chaos","Four O Ice Beer","Krugbier"]}')) #JSON input from user
+        input_test = pd.DataFrame(request.json) #JSON input from user
         input_test['beer_beerid'] = pd.DataFrame(beer2.loc[beer2['beer_name'].isin(input_test['beer_name']), 'beer_beerid'].unique()).astype('int64') #Obtain beer id for beer name given by user
         
         predict_frame = tc.SFrame(input_test) #Convert user input dataframe to SFrame
