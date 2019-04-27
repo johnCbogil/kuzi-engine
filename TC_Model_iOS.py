@@ -13,23 +13,23 @@ import turicreate as tc
 
 
 #Read CSV 
-beer2 = pd.read_csv('beer2.csv')
+unique_beers = pd.read_csv('unique_beers.csv')
 
 
 # In[7]:
 
 
 #Create dataframe of required columns then convert to SFrame for turicreate
-beer2_1 = beer2[['userId','beer_beerid','review_overall']]
-beer2_1 = tc.SFrame(beer2_1)
-beer2_1 = beer2_1.dropna()
+unique_beers_1 = unique_beers[['userId','beer_beerid','review_overall']]
+unique_beers_1 = tc.SFrame(unique_beers_1)
+unique_beers_1 = unique_beers_1.dropna()
 
 
 # In[8]:
 
 
 #Create SFrame of additional info on beers for model
-beer_info = beer2[['beer_beerid','beer_style','beer_abv']].drop_duplicates()
+beer_info = unique_beers[['beer_beerid','beer_style','beer_abv']].drop_duplicates()
 beer_info = tc.SFrame(beer_info)
 
 
@@ -37,7 +37,7 @@ beer_info = tc.SFrame(beer_info)
 
 
 #Create training and validation set
-training_data, validation_data = tc.recommender.util.random_split_by_user(beer2_1, 'userId', 'beer_beerid')
+training_data, validation_data = tc.recommender.util.random_split_by_user(unique_beers_1, 'userId', 'beer_beerid')
 
 
 # In[10]:
