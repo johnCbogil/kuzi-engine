@@ -11,6 +11,9 @@ import collections
 import traceback
 import turicreate as tc
 from flask import send_file
+from pandas.io.json import json_normalize
+import json
+
 
 app = Flask(__name__)
 
@@ -28,8 +31,24 @@ def hello():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        # input_test = pd.DataFrame(request.json) #JSON input from user
-        input_test = pd.DataFrame(request.json) #JSON input from user
+        print("request JSON:")
+        print(request.json)
+        # input_test = pd.DataFrame(pd.read_json('{"userId": ["101010","101010","101010"], "beer_name": ["Stoudts American Pale Ale","Founders KBS (Kentucky Breakfast Stout)","Founders CBS Imperial Stout"]}')) #JSON input from user
+        # input_test = pd.DataFrame(pd.read_json('{"userId": ["101010","101010","101010"], "beer_name": ["Bourbon Chaos","Four O Ice Beer","Krugbier"]}')) #JSON input from user
+
+        # input_test = pd.DataFrame(n) #JSON input from user
+        # input_test = pd.DataFrame(pd.read_json(request.json)) #JSON input from user
+
+        # jsonString = dict(request.json)
+        # input_test = pd.DataFrame.from_dict(jsonString, orient='columns')
+
+        jsonDump = json.dumps(request.json)
+        input_test = pd.DataFrame(pd.read_json(jsonDump)) #JSON input from user
+
+
+    
+        print("input_test:")
+        print(input_test)
         input_test['beer_beerid'] = pd.DataFrame(beer2.loc[beer2['beer_name'].isin(input_test['beer_name']), 'beer_beerid'].unique()).astype('int64') #Obtain beer id for beer name given by user
         
         predict_frame = tc.SFrame(input_test) #Convert user input dataframe to SFrame
