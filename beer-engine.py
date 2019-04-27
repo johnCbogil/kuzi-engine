@@ -1,17 +1,12 @@
 import pandas as pd
 import numpy as np
 from flask import Flask
-from sklearn.linear_model import LogisticRegression
-from sklearn.externals import joblib
 from flask import request
 from flask import jsonify
-from surprise import KNNBasic, SVD, Reader, Dataset
-from surprise.model_selection import cross_validate
 import collections
 import traceback
 import turicreate as tc
 from flask import send_file
-from pandas.io.json import json_normalize
 import json
 
 
